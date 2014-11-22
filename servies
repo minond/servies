@@ -93,11 +93,15 @@ go() {
     listen "conn" "$HOST" "$PORT"
 }
 
+#=== FUNCTION =================================================================
+#        NAME: not_found
+# DESCRIPTION: default not found handler. overwrite for custom output
+#==============================================================================
 not_found() {
     echo HTTP/1.1 404 Not Found
     echo Content-Type: text/plain
     echo
-    echo
+    echo 404, Not found
 }
 
 #=== FUNCTION =================================================================
