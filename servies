@@ -1,5 +1,9 @@
 #!/bin/bash
 
+ROUTE_URLS=()
+ROUTE_METHODS=()
+ROUTE_HANDLERS=()
+
 #=== FUNCTION =================================================================
 #        NAME: pipe
 # DESCRIPTION: create a fifo that acts as a pipe from a program to another
@@ -43,13 +47,44 @@ listen() {
                 fi
 
                 if [ "x$line" = "x" ]; then
-                    echo "routing ($method) $url"
-                    local body=$(handle_request)
-                    echo "$body" > conn
+                    route "$conn" "$method" "$url"
                 fi
             done
         )
     done
+}
+
+#=== FUNCTION =================================================================
+#        NAME: route
+# DESCRIPTION: find a request handler and call the action
+# PARAMETER 1: name of fifo file
+# PARAMETER 2: http method
+# PARAMETER 3: url
+#==============================================================================
+route() {
+    local action=
+
+    local conn=$1
+    local method=$2
+    local url=$3
+
+    echo "routing ($method) $url"
+
+    for ((i=0;i<${#ROUTE_METHODS[@]};i++))
+    do
+        if [ "${ROUTE_METHODS[$i]}" = "$method" ] && [ "${ROUTE_URLS[$i]}" = "$url" ]; then
+            action="${ROUTE_HANDLERS[$i]}"
+        fi
+    done
+
+    if [ ! -z "$action" ]; then
+        "$action" > "$conn"
+    else
+        echo HTTP/1.1 404 Not Found > "$conn"
+        echo Content-Type: text/plain > "$conn"
+        echo > "$conn"
+        echo > "$conn"
+    fi
 }
 
 #=== FUNCTION =================================================================
@@ -61,4 +96,19 @@ go() {
     [ -z "$HOST" ] && HOST=0.0.0.0
     pipe "conn"
     listen "conn" "$HOST" "$PORT"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: get
+# DESCRIPTION: add a get rout handler
+# PARAMETER 1: url string (include first forward slash)
+# PARAMETER 2: command name
+#==============================================================================
+get() {
+    local url=$1
+    local handler=$2
+
+    ROUTE_URLS+=("$url")
+    ROUTE_METHODS+=("GET")
+    ROUTE_HANDLERS+=("$handler")
 }
