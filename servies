@@ -4,6 +4,11 @@ ROUTE_URLS=()
 ROUTE_METHODS=()
 ROUTE_HANDLERS=()
 
+declare -A http_status_codes=(
+    ["200"]="OK"
+    ["404"]="Not found"
+)
+
 #=== FUNCTION =================================================================
 #        NAME: pipe
 # DESCRIPTION: create a fifo that acts as a pipe from a program to another
@@ -80,6 +85,31 @@ route() {
     [ -z "$action" ] && action=not_found
     echo " [$action]"
     "$action" > "$conn"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: status
+# DESCRIPTION: output a header
+# PARAMETER 1: header name
+# PARAMETER 2: header value
+#==============================================================================
+status() {
+    local code=$1
+    local name=$2
+
+    [ -z "$name" ] && name="${http_status_codes[$code]}"
+
+    echo HTTP/1.1 $code $name
+}
+
+#=== FUNCTION =================================================================
+#        NAME: header
+# DESCRIPTION: output a header
+# PARAMETER 1: header name
+# PARAMETER 2: header value
+#==============================================================================
+header() {
+    echo "$1: $2"
 }
 
 #=== FUNCTION =================================================================
