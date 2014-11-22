@@ -79,6 +79,7 @@ route() {
     do
         if [ "${ROUTE_METHODS[$i]}" = "$method" ] && [ "${ROUTE_URLS[$i]}" = "$url" ]; then
             action="${ROUTE_HANDLERS[$i]}"
+            break
         fi
     done
 
