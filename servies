@@ -68,7 +68,7 @@ route() {
     local method=$2
     local url=$3
 
-    echo "routing ($method) $url"
+    echo -n "routing ($method) $url"
 
     for ((i=0;i<${#ROUTE_METHODS[@]};i++))
     do
@@ -77,14 +77,9 @@ route() {
         fi
     done
 
-    if [ ! -z "$action" ]; then
-        "$action" > "$conn"
-    else
-        echo HTTP/1.1 404 Not Found > "$conn"
-        echo Content-Type: text/plain > "$conn"
-        echo > "$conn"
-        echo > "$conn"
-    fi
+    [ -z "$action" ] && action=not_found
+    echo " [$action]"
+    "$action" > "$conn"
 }
 
 #=== FUNCTION =================================================================
@@ -96,6 +91,13 @@ go() {
     [ -z "$HOST" ] && HOST=0.0.0.0
     pipe "conn"
     listen "conn" "$HOST" "$PORT"
+}
+
+not_found() {
+    echo HTTP/1.1 404 Not Found
+    echo Content-Type: text/plain
+    echo
+    echo
 }
 
 #=== FUNCTION =================================================================
@@ -112,3 +114,9 @@ get() {
     ROUTE_METHODS+=("GET")
     ROUTE_HANDLERS+=("$handler")
 }
+
+# running as command?
+if [ ! -z "$1" ]; then
+    source "$1"
+    go
+fi
