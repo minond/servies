@@ -136,18 +136,62 @@ not_found() {
 }
 
 #=== FUNCTION =================================================================
+#        NAME: save_route
+# DESCRIPTION: add a new route
+# PARAMETER 1: method
+# PARAMETER 2: url string (include first forward slash)
+# PARAMETER 3: command name
+#==============================================================================
+save_route() {
+    local method=$1
+    local url=$2
+    shift
+    shift
+    local handler="$@"
+
+    ROUTE_URLS+=("$url")
+    ROUTE_METHODS+=("$method")
+    ROUTE_HANDLERS+=("$handler")
+}
+
+#=== FUNCTION =================================================================
 #        NAME: get
-# DESCRIPTION: add a get rout handler
+# DESCRIPTION: add a get route handler
 # PARAMETER 1: url string (include first forward slash)
 # PARAMETER 2: command name
 #==============================================================================
 get() {
-    local url=$1
-    local handler=$2
+    save_route GET "$@"
+}
 
-    ROUTE_URLS+=("$url")
-    ROUTE_METHODS+=("GET")
-    ROUTE_HANDLERS+=("$handler")
+#=== FUNCTION =================================================================
+#        NAME: post
+# DESCRIPTION: add a post route handler
+# PARAMETER 1: url string (include first forward slash)
+# PARAMETER 2: command name
+#==============================================================================
+post() {
+    save_route POST "$@"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: put
+# DESCRIPTION: add a put route handler
+# PARAMETER 1: url string (include first forward slash)
+# PARAMETER 2: command name
+#==============================================================================
+put() {
+    save_route PUT "$@"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: patch
+# DESCRIPTION: add a patch route handler
+# PARAMETER 1: url string (include first forward slash)
+# PARAMETER 2: command name
+#==============================================================================
+patch() {
+    save_route PATCH "$@"
 }
 
 # running as command?
