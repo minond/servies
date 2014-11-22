@@ -1,0 +1,53 @@
+#!/bin/bash
+
+#=== FUNCTION =================================================================
+#        NAME: pipe
+# DESCRIPTION: create a fifo that acts as a pipe from a program to another
+# PARAMETER 1: name of fifo file
+#==============================================================================
+pipe() {
+    local name=$1
+
+    mkfifo "$name"
+    trap "rm -f '$name'" exit
+    echo "created $name fifo"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: listen
+# DESCRIPTION: makes netcat listen for a request
+# PARAMETER 1: name of fifo file
+# PARAMETER 2: listen on this host
+# PARAMETER 2: listen on this port
+#==============================================================================
+listen() {
+    local conn=$1
+    local host=$2
+    local port=$3
+
+    echo "starting server on $HOST:$PORT"
+
+    while true; do
+        cat "$conn" | netcat -l "$host" "$port" > >(
+            local parsed=0
+            local method=
+            local url=
+
+            while read line; do
+                line=$(echo "$line" | tr -d '[\r\n]')
+
+                if [ "$parsed" -eq 0 ]; then
+                    parsed=1
+                    url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
+                    method=$(echo "$line" | sed -n 's/\(.*\) .* .*/\1/p');
+                fi
+
+                if [ "x$line" = "x" ]; then
+                    echo "routing ($method) $url"
+                    local body=$(handle_request)
+                    echo "$body" > conn
+                fi
+            done
+        )
+    done
+}
