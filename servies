@@ -34,7 +34,7 @@ listen() {
             local url=
 
             while read line; do
-                line=$(echo "$line" | tr -d '[\r\n]')
+                line=$(echo "$line" | tr -d '\r\n')
 
                 if [ "$parsed" -eq 0 ]; then
                     parsed=1
@@ -50,4 +50,15 @@ listen() {
             done
         )
     done
+}
+
+#=== FUNCTION =================================================================
+#        NAME: go
+# DESCRIPTION: start a server
+#==============================================================================
+go() {
+    [ -z "$PORT" ] && PORT=8080
+    [ -z "$HOST" ] && HOST=0.0.0.0
+    pipe "conn"
+    listen "conn" "$HOST" "$PORT"
 }
