@@ -1,2 +1,2 @@
 install:
-	ln -s $(shell pwd)/servies /usr/local/bin/servies
+	cp $(shell pwd)/servies /usr/local/bin/servies
