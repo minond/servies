@@ -34,9 +34,10 @@ listen() {
     local host=$2
     local port=$3
 
-    echo "starting server on $HOST:$PORT"
-
     while true; do
+        echo
+        echo "listening for new request on $HOST:$PORT"
+
         cat "$conn" | netcat -l "$host" "$port" > >(
             local parsed=0
             local method=
@@ -85,7 +86,7 @@ route() {
 
     [ -z "$action" ] && action=not_found
     echo " [$action]"
-    "$action" > "$conn"
+    eval "$action" > "$conn"
 }
 
 #=== FUNCTION =================================================================
