@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/minond/servies.svg?branch=master)](https://travis-ci.org/minond/servies)
+
 `servies` is a bash micro-framework that uses netcat to listen to and respond
 to HTTP requests.
 
