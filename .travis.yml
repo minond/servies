@@ -3,5 +3,9 @@ language: php
 php:
   - 5.5
 
+env:
+  - PORT=9531 HOST=0.0.0.0
+
 script:
+  - ./servies sample.sh &
   - make test
