@@ -1,5 +1,3 @@
-#!/bin/bash
-
 source ./servies
 
 set_up() {

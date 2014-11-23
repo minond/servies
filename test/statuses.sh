@@ -1,5 +1,3 @@
-#!/bin/bash
-
 source ./servies
 
 expect "known statuses only require a code" \

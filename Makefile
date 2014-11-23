@@ -1,5 +1,7 @@
 .PHONY: install test
 
+all: test
+
 install:
 	cp $(shell pwd)/servies /usr/local/bin/servies
 

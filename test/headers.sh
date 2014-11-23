@@ -1,5 +1,3 @@
-#!/bin/bash
-
 source ./servies
 
 expect "headers to be colon separated" \
