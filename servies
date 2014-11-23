@@ -16,10 +16,8 @@ declare -A http_status_codes=(
 #==============================================================================
 pipe() {
     local name=$1
-
     mkfifo "$name"
     trap "rm -f '$name'" exit
-    echo "created $name fifo"
 }
 
 #=== FUNCTION =================================================================
@@ -34,10 +32,9 @@ listen() {
     local host=$2
     local port=$3
 
-    while true; do
-        echo
-        echo "listening for new request on $HOST:$PORT"
+    echo "listening for requests on $HOST:$PORT"
 
+    while true; do
         cat "$conn" | netcat -l "$host" "$port" > >(
             local parsed=0
             local method=
@@ -74,7 +71,7 @@ route() {
     local method=$2
     local url=$3
 
-    echo -n "routing ($method) $url"
+    echo -n "routing $(tput setaf 3)$method $url$(tput sgr0) to"
 
     for ((i=0;i<${#ROUTE_METHODS[@]};i++))
     do
@@ -85,7 +82,7 @@ route() {
     done
 
     [ -z "$action" ] && action=not_found
-    echo " [$action]"
+    echo " $action"
     eval "$action" > "$conn"
 }
 
