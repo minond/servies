@@ -18,9 +18,13 @@ show_python_processes() {
 }
 ```
 
-let's say you saved that to a file named `app`. to start that server, just run
-`server app`, and that will make netcat listen to requests made to your local
-host on port `8080` and route your requests.
+anything sent to stdout by your handler function or command will be sent back
+as the response body. there's only a `status` and a `header` command that you
+can use to customize the status code and to add any header you want.
+
+ok, so let's say you saved that to a file named `app`. to start that server,
+just run `server app`, and that will make netcat listen to requests made to
+your local host on port `8080` and route your requests.
 
 you can also set a `PORT` and/or a `HOST` variable to bind netcat to something
 other than the default `0.0.0.0:8080`.
