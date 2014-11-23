@@ -1,7 +1,7 @@
 `servies` is a bash micro-framework that uses netcat to listen to and respond
 to HTTP requests.
 
-##### example
+#### example
 
 your request handlers can be one-liners:
 
@@ -31,15 +31,15 @@ other than the default `0.0.0.0:8080`.
 
 checkout the `sample.sh` file for an example.
 
-##### installing
+#### installing
 
 just clone the repo and run `make install` (you may need to sudo that)
 
-##### tests
+#### tests
 
 run `make test` to run automated tests
 
-##### important
+#### important
 
 also, don't ever use this. it has issues with the responses and it probably
 can't handle a whole lot of usage. this is just a toy project.
