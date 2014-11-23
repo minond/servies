@@ -101,7 +101,7 @@ status() {
 
     [ -z "$name" ] && name="${http_status_codes[$code]}"
 
-    echo HTTP/1.1 $code $name
+    echo HTTP/1.1 "$code" "$name"
 }
 
 #=== FUNCTION =================================================================
@@ -148,7 +148,7 @@ save_route() {
     local url=$2
     shift
     shift
-    local handler="$@"
+    local handler="$*"
 
     ROUTE_URLS+=("$url")
     ROUTE_METHODS+=("$method")
