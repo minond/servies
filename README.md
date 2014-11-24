@@ -39,7 +39,8 @@ just clone the repo and run `make install` (you may need to sudo that)
 
 #### tests
 
-run `make test` to run automated tests
+start the sample application, by running `./servies sample.sh`, then run `make
+test` to run automated tests
 
 #### important
 
