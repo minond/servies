@@ -4,10 +4,38 @@ ROUTE_URLS=()
 ROUTE_METHODS=()
 ROUTE_HANDLERS=()
 
+DEBUG_LAST_CALL_TIME=$(date +%s%N)
+DEBUG_COLOR_LABEL="$(tput bold)$(tput setaf 3)"
+DEBUG_COLOR_TIME="$(tput bold)$(tput setaf 7)"
+DEBUG_COLOR_RESET="$(tput sgr0)"
+
 declare -A http_status_codes=(
     ["200"]="OK"
     ["404"]="Not found"
 )
+
+#=== FUNCTION =================================================================
+#        NAME: debug
+# DESCRIPTION: debug output method. enabled by setting a DEBUG env var
+# PARAMETER 1: message string label
+# PARAMETER 1: message
+#==============================================================================
+debug() {
+    local current_time=
+    local diff_time=
+
+    local name="$1"
+    shift
+    local message="$*"
+
+    if [ ! -z "$DEBUG" ] && [[ "$name" == $DEBUG ]]; then
+        current_time=$(date +%s%N)
+        diff_time=$(( current_time - DEBUG_LAST_CALL_TIME ))
+        diff_time=$(( diff_time / 1000000 ))
+
+        echo "  $DEBUG_COLOR_LABEL$name$DEBUG_COLOR_RESET $message $DEBUG_COLOR_TIME+$diff_time ms$DEBUG_COLOR_RESET"
+    fi
+}
 
 #=== FUNCTION =================================================================
 #        NAME: pipe
@@ -32,7 +60,7 @@ listen() {
     local host=$2
     local port=$3
 
-    echo "listening for requests on $HOST:$PORT"
+    debug server "listening for requests on $HOST:$PORT"
 
     while true; do
         cat "$conn" | netcat -l "$host" "$port" > >(
@@ -71,8 +99,6 @@ route() {
     local method=$2
     local url=$3
 
-    echo -n "routing $(tput setaf 3)$method $url$(tput sgr0) to"
-
     for ((i=0;i<${#ROUTE_METHODS[@]};i++))
     do
         if [ "${ROUTE_METHODS[$i]}" = "$method" ] && [ "${ROUTE_URLS[$i]}" = "$url" ]; then
@@ -82,7 +108,7 @@ route() {
     done
 
     [ -z "$action" ] && action=not_found
-    echo " $action"
+    debug router "routing $method $url to $action"
     eval "$action" > "$conn"
 }
 
@@ -150,6 +176,8 @@ save_route() {
     ROUTE_URLS+=("$url")
     ROUTE_METHODS+=("$method")
     ROUTE_HANDLERS+=("$handler")
+
+    debug route "creating route: $method $url"
 }
 
 #=== FUNCTION =================================================================
