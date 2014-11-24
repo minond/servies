@@ -5,6 +5,7 @@ source ~+/vendor/minond/debug/debug
 ROUTE_URLS=()
 ROUTE_METHODS=()
 ROUTE_HANDLERS=()
+DEBUG_ROUTER_COLOR="$RANDOM"
 
 declare -A http_status_codes=(
     ["200"]="OK"
@@ -84,7 +85,7 @@ route() {
     done
 
     [ -z "$action" ] && action=not_found
-    debug:set_color router 4
+    debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
     eval "$action" > "$conn"
 }
