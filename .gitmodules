@@ -1,3 +1,6 @@
 [submodule "vendor/minond/expect"]
 	path = vendor/minond/expect
 	url = http://github.com/minond/expect
+[submodule "vendor/minond/debug"]
+	path = vendor/minond/debug
+	url = http://github.com/minond/debug

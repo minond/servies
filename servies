@@ -1,41 +1,15 @@
 #!/bin/bash
 
+source ~+/vendor/minond/debug/debug
+
 ROUTE_URLS=()
 ROUTE_METHODS=()
 ROUTE_HANDLERS=()
-
-DEBUG_LAST_CALL_TIME=$(date +%s%N)
-DEBUG_COLOR_LABEL="$(tput bold)$(tput setaf 3)"
-DEBUG_COLOR_TIME="$(tput bold)$(tput setaf 7)"
-DEBUG_COLOR_RESET="$(tput sgr0)"
 
 declare -A http_status_codes=(
     ["200"]="OK"
     ["404"]="Not found"
 )
-
-#=== FUNCTION =================================================================
-#        NAME: debug
-# DESCRIPTION: debug output method. enabled by setting a DEBUG env var
-# PARAMETER 1: message string label
-# PARAMETER 1: message
-#==============================================================================
-debug() {
-    local current_time=
-    local diff_time=
-
-    local name="$1"
-    shift
-    local message="$*"
-
-    if [ ! -z "$DEBUG" ] && [[ "$name" == $DEBUG ]]; then
-        current_time=$(date +%s%N)
-        diff_time=$(( current_time - DEBUG_LAST_CALL_TIME ))
-        diff_time=$(( diff_time / 1000000 ))
-
-        echo "  $DEBUG_COLOR_LABEL$name$DEBUG_COLOR_RESET $message $DEBUG_COLOR_TIME+$diff_time ms$DEBUG_COLOR_RESET"
-    fi
-}
 
 #=== FUNCTION =================================================================
 #        NAME: pipe
