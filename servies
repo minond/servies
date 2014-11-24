@@ -84,6 +84,7 @@ route() {
     done
 
     [ -z "$action" ] && action=not_found
+    debug:set_color router 4
     debug router "routing $method $url to $action"
     eval "$action" > "$conn"
 }
