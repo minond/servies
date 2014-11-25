@@ -21,21 +21,20 @@ can use to customize the status code and to add any header you want.
 
 ok, so let's say you saved that to a file named `app`. to start that server,
 just run `server app`, and that will make netcat listen to requests made to
-your local host on port `8080` and route your requests.
+your local host on port `8080` and route your requests. checkout the
+`sample.sh` file for an example.
 
 you can also set a `PORT` and/or a `HOST` variable to bind netcat to something
 other than the default `0.0.0.0:8080`.
 
-checkout the `sample.sh` file for an example.
-
 #### installing
 
-just clone the repo and run `make install` (you may need to sudo that)
+clone the repo and run `make install` (you may need to sudo that)
 
 #### tests
 
 start the sample application, by running `./servies sample.sh`, then run `make
-test` to run automated tests
+test`
 
 #### important
 
