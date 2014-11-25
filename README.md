@@ -39,8 +39,8 @@ test` to run automated tests
 
 #### important
 
-also, don't ever use this. it has issues with the responses and it probably
-can't handle a whole lot of usage. this is just a toy project.
+don't ever use this. it has issues with the responses and it probably can't
+handle a whole lot of usage. this is just a toy project.
 
 #### also important
 
