@@ -11,14 +11,9 @@ your request handlers can be one-liners:
 get "/" echo "welcome"
 ```
 
-or functions:
-
-```bash
-get "/ps/python" show_python_processes
-show_python_processes() {
-    ps aux | grep python
-}
-```
+you can, of course, define your own commands/functions and use those as well.
+I won't include an example of that because it's not "dead sexy" (yeah, that's
+for you)
 
 anything sent to stdout by your handler function or command will be sent back
 as the response body. there's only a `status` and a `header` command that you
@@ -46,3 +41,8 @@ test` to run automated tests
 
 also, don't ever use this. it has issues with the responses and it probably
 can't handle a whole lot of usage. this is just a toy project.
+
+#### also important
+
+if you are going to use this, then I do ask that you only browse what ever you
+build using [links](http://links.twibright.com/) (jk)
