@@ -45,4 +45,4 @@ handle a whole lot of usage. this is just a toy project.
 #### also important
 
 if you are going to use this, then I do ask that you only browse what ever you
-build using [links](http://links.twibright.com/) (jk)
+build using [Links](http://links.twibright.com/) (jk)
