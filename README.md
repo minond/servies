@@ -48,6 +48,5 @@ build using [Links](http://links.twibright.com/) (jk)
 
 #### thanks
 
-thank you to [this SO
-response](http://stackoverflow.com/questions/16640054/minimal-web-server-using-netcat#answer-24342101)
+thank you to [this SO response](http://stackoverflow.com/a/24342101/247674)
 that showed me how to redirect nc calls to a command
