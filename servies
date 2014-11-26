@@ -20,7 +20,7 @@ declare -A http_status_codes=(
 pipe() {
     local name=$1
     mkfifo "$name"
-    trap "rm -f '$name'" exit
+    trap "rm -f '$name'" EXIT
 }
 
 #=== FUNCTION =================================================================
