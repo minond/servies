@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/minond/servies.svg?branch=master)](https://travis-ci.org/minond/servies)
 
-`servies` is a bash micro-framework that uses netcat to listen to and respond
+`servies` is a bash micro-framework that uses netcat to listen for and respond
 to HTTP requests.
 
 #### example
@@ -45,3 +45,9 @@ handle a whole lot of usage. this is just a toy project.
 
 if you are going to use this, then I do ask that you only browse what ever you
 build using [Links](http://links.twibright.com/) (jk)
+
+#### thanks
+
+thank you to [this SO
+response](http://stackoverflow.com/questions/16640054/minimal-web-server-using-netcat#answer-24342101)
+that showed me how to redirect nc calls to a command
