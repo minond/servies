@@ -148,22 +148,49 @@ not_found() {
 
 #=== FUNCTION =================================================================
 #        NAME: url_pattern
-# DESCRIPTION: converts a mattern url into a url you can use as a match
-#              expression. steps include (order of sed calls):
-#                1. make slashes optional:
-#                   /welcome/ => \/?welcome\/?
-#                2. replace human groups with regex groups:
-#                   /welcome/:name => /welcome/\w\+
-#                3. replace question makes with optional group match
-#                   expressions:
-#                   /welcome/:name => /welcome/\w\+\?
+# DESCRIPTION: converts a human-friendly url into a string you can use as a
+#              match expression
 # PARAMETER 1: the url you want to convert into an expression
 #==============================================================================
 url_pattern() {
     echo "$1" | \
+        # make slashes optional: /welcome/ => \/?welcome\/?
         sed 's/\//\/?/g' | \
+        # replace human groups with regex groups: /welcome/:name => /welcome/\w\+
         sed -E 's/:(\w*)/\\w\\+/g' | \
+        # replace question makes with optional group match expressions:
+        # /welcome/:name => /welcome/\w\+\?
         sed 's/?/\\?/g'
+}
+
+#=== FUNCTION =================================================================
+#        NAME: url_extractor
+# DESCRIPTION: converts a human-friendly url into a sed match and replace
+#              expression that can be used to extract match values
+# PARAMETER 1: the url you want to convert into an expression
+#==============================================================================
+url_extractor() {
+    local url="$1"
+    local groups=$(echo $(url_groups "$url") | wc -w)
+
+    local replace=
+    local search=$(echo "$url" | \
+        # escape forward slashes
+        sed 's/\//\\\//g' | \
+        # optional forward slashes
+        sed 's/\//\/{0,}/g' | \
+        # replace groups with work matching expression
+        sed -E 's/:(\w*)/(\\w\+)/g' | \
+        # replace question marks with regex expression for optional matches
+        sed 's/?/{0,}/g')
+
+    if [ "$groups" -ne 0 ]; then
+        for i in $(seq 1 "$groups"); do
+            replace="$replace \\$i"
+        done
+    fi
+
+    echo "s/$search/$replace/"
 }
 
 #=== FUNCTION =================================================================
@@ -191,7 +218,8 @@ save_route() {
     shift
     local handler="$*"
 
-    ROUTE_PATTERN+=($(url_pattern "$url"))
+    ROUTE_PATTERN+=("$(url_pattern "$url")")
+    ROUTE_EXTRACTOR+=("$(url_extractor "$url")")
     ROUTE_GROUPS+=("$(url_groups "$url")")
     ROUTE_URLS+=("$url")
     ROUTE_METHODS+=("$method")
