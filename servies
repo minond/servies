@@ -183,7 +183,7 @@ save_route() {
     local handler="$*"
 
     ROUTE_PATTERN+=($(url_pattern "$url"))
-    ROUTE_GROUPS+=($(url_groups "$url"))
+    ROUTE_GROUPS+=("$(url_groups "$url")")
     ROUTE_URLS+=("$url")
     ROUTE_METHODS+=("$method")
     ROUTE_HANDLERS+=("$handler")
