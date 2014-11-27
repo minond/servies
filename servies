@@ -138,6 +138,37 @@ not_found() {
 }
 
 #=== FUNCTION =================================================================
+#        NAME: url_pattern
+# DESCRIPTION: converts a mattern url into a url you can use as a match
+#              expression. steps include (order of sed calls):
+#                1. make slashes optional:
+#                   /welcome/ => \/?welcome\/?
+#                2. replace human groups with regex groups:
+#                   /welcome/:name => /welcome/\w\+
+#                3. replace question makes with optional group match
+#                   expressions:
+#                   /welcome/:name => /welcome/\w\+\?
+# PARAMETER 1: the url you want to convert into an expression
+#==============================================================================
+url_pattern() {
+    echo "$1" | \
+        sed 's/\//\/?/g' | \
+        sed -E 's/:(\w*)/\\w\\+/g' | \
+        sed 's/?/\\?/g'
+}
+
+#=== FUNCTION =================================================================
+#        NAME: url_groups
+# DESCRIPTION: searches a url for groups (:group_name)
+# PARAMETER 1: the url you want to get groups from
+#==============================================================================
+url_groups() {
+    echo $(echo "$1" | \
+        grep -o -e ':\w\+' | \
+        grep -o -e '\w\+')
+}
+
+#=== FUNCTION =================================================================
 #        NAME: save_route
 # DESCRIPTION: add a new route
 # PARAMETER 1: method
@@ -151,6 +182,8 @@ save_route() {
     shift
     local handler="$*"
 
+    ROUTE_PATTERN+=($(url_pattern "$url"))
+    ROUTE_GROUPS+=($(url_groups "$url"))
     ROUTE_URLS+=("$url")
     ROUTE_METHODS+=("$method")
     ROUTE_HANDLERS+=("$handler")
