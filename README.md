@@ -21,20 +21,21 @@ as the response body, but there's also a `status` and a `header` command that
 you can use to customize the status code and to add any header you want.
 checkout the `sample.sh` file for an example.
 
-#### usage
-
-let's say you saved that to a file named `app`. to start that server, just run
-`server app`, and that will make netcat listen to requests made to your local
-host on port `8080` and route your requests. you can also set a `PORT` and/or a
-`HOST` variable to bind netcat to something other than the default
-`0.0.0.0:8080`.
-
 #### routes
 
 required (`:something`) and optional (`:something?`) route parameters are
-supported. if you want to use variables in these, make sure to declare your
-handlers using single quotes so that the variables are evaluated during the
-routing
+supported. during the routing, servies will extract these values from the url
+and declare them as variables you can use. if you want to use variables in
+these, make sure to declare your handlers using single quotes so that the
+variables are evaluated during the routing
+
+#### usage
+
+let's say you saved your route definitions to a file named `app`. to start that
+server, just run `servies app`, and that will make netcat listen to requests
+made to your local host on port `8080` and route your requests. you can also
+set a `PORT` and/or a `HOST` variable to bind netcat to something other than
+the default `0.0.0.0:8080`.
 
 #### installing
 
