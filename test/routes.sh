@@ -19,7 +19,7 @@ tear_down() {
 set_up
 
 expect "patterns are saved in order" \
-    $(test "${ROUTE_PATTERN[1]}" = "^/\?two/\?\w\+/\?\w\+\$")
+    $(test "${ROUTE_PATTERN[1]}" = "^/\?two/\?.\+/\?.\+\$")
 
 expect "extractors are saved in order" \
     $(test "${ROUTE_EXTRACTOR[1]}" = "s/\/{0,}two\/{0,}(\w+)\/{0,}(\w+)/ \1 \2/")
@@ -38,7 +38,7 @@ expect "groups are saved in order" \
 
 
 expect "get helper saves correct pattern" \
-    $(test "${ROUTE_PATTERN[2]}" = "^/\?get/\?\w\+/\?\w\+\$")
+    $(test "${ROUTE_PATTERN[2]}" = "^/\?get/\?.\+/\?.\+\$")
 
 expect "get helper saves correct extractors" \
     $(test "${ROUTE_EXTRACTOR[2]}" = "s/\/{0,}get\/{0,}(\w+)\/{0,}(\w+)/ \1 \2/")
@@ -54,7 +54,7 @@ expect "get helper saves correct handler" \
 
 
 expect "post helper saves correct pattern" \
-    $(test "${ROUTE_PATTERN[3]}" = "^/\?post/\?\w\+/\?\w\+\$")
+    $(test "${ROUTE_PATTERN[3]}" = "^/\?post/\?.\+/\?.\+\$")
 
 expect "post helper saves correct extractors" \
     $(test "${ROUTE_EXTRACTOR[3]}" = "s/\/{0,}post\/{0,}(\w+)\/{0,}(\w+)/ \1 \2/")
@@ -70,7 +70,7 @@ expect "post helper saves correct handler" \
 
 
 expect "put helper saves correct pattern" \
-    $(test "${ROUTE_PATTERN[4]}" = "^/\?put/\?\w\+/\?\w\+\$")
+    $(test "${ROUTE_PATTERN[4]}" = "^/\?put/\?.\+/\?.\+\$")
 
 expect "put helper saves correct extractors" \
     $(test "${ROUTE_EXTRACTOR[4]}" = "s/\/{0,}put\/{0,}(\w+)\/{0,}(\w+)/ \1 \2/")
@@ -86,7 +86,7 @@ expect "put helper saves correct handler" \
 
 
 expect "patch helper saves correct pattern" \
-    $(test "${ROUTE_PATTERN[5]}" = "^/\?patch/\?\w\+/\?\w\+\$")
+    $(test "${ROUTE_PATTERN[5]}" = "^/\?patch/\?.\+/\?.\+\$")
 
 expect "patch helper saves correct extractors" \
     $(test "${ROUTE_EXTRACTOR[5]}" = "s/\/{0,}patch\/{0,}(\w+)\/{0,}(\w+)/ \1 \2/")

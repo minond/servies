@@ -199,8 +199,8 @@ url_pattern() {
     local pattern=$(echo "$1" | \
         # make slashes optional: /welcome/ => \/?welcome\/?
         sed 's/\//\/?/g' | \
-        # replace human groups with regex groups: /welcome/:name => /welcome/\w\+
-        sed -E 's/:(\w*)/\\w\\+/g' | \
+        # replace human groups with regex groups: /welcome/:name => /welcome/.\+
+        sed -E 's/:(\w*)/.\\+/g' | \
         # replace question makes with optional group match expressions:
         # /welcome/:name => /welcome/\w\+\?
         sed 's/?/\\?/g')
