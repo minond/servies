@@ -116,7 +116,9 @@ route() {
     [ -z "$action" ] && action=not_found
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
-    eval "$action" > "$conn"
+
+    # send errors to error log??
+    eval "$action" 2> /dev/null > "$conn"
 }
 
 #=== FUNCTION =================================================================
