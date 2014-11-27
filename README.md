@@ -48,8 +48,11 @@ test`
 
 #### important
 
-don't ever use this. it has issues with the responses and it probably can't
-handle a whole lot of usage. this is just a toy project.
+don't ever use this. it has issues with the responses, it probably can't handle
+a whole lot of usage, and let's not even get started on the security issues
+something like this has. I mean, you can do something like this `get "/:file"
+cat \$file` and make most of your file system avialable. this is just a toy
+project. just play around with it.
 
 #### also important
 
