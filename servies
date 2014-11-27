@@ -87,7 +87,8 @@ route() {
 
     for ((i=0;i<${#ROUTE_METHODS[@]};i++))
     do
-        if [ "${ROUTE_METHODS[$i]}" = "$method" ] && [ "${ROUTE_URLS[$i]}" = "$url" ]; then
+        route_matches_index "$i" "$method" "$url"
+        if [ $? -eq 0 ]; then
             action="${ROUTE_HANDLERS[$i]}"
             break
         fi
@@ -97,6 +98,27 @@ route() {
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
     eval "$action" > "$conn"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: route_matches_index
+# DESCRIPTION: given a url and a request method, and also the index of the
+#              routes array of the route in question, this will check if
+#              the route in question can be used to handle the request
+# PARAMETER 1: index of the routes array to check
+# PARAMETER 2: request method
+# PARAMETER 3: url
+#==============================================================================
+route_matches_index() {
+    local i="$1"
+    local method="$2"
+    local url="$3"
+
+    if [ "${ROUTE_METHODS[$i]}" = "$method" ]; then
+        echo "$url" | grep -e "${ROUTE_PATTERN[$i]}" &> /dev/null
+    else
+        false
+    fi
 }
 
 #=== FUNCTION =================================================================
@@ -153,14 +175,16 @@ not_found() {
 # PARAMETER 1: the url you want to convert into an expression
 #==============================================================================
 url_pattern() {
-    echo "$1" | \
+    local pattern=$(echo "$1" | \
         # make slashes optional: /welcome/ => \/?welcome\/?
         sed 's/\//\/?/g' | \
         # replace human groups with regex groups: /welcome/:name => /welcome/\w\+
         sed -E 's/:(\w*)/\\w\\+/g' | \
         # replace question makes with optional group match expressions:
         # /welcome/:name => /welcome/\w\+\?
-        sed 's/?/\\?/g'
+        sed 's/?/\\?/g')
+
+    echo "^${pattern}$"
 }
 
 #=== FUNCTION =================================================================
