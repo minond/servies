@@ -8,7 +8,7 @@ to HTTP requests.
 your request handlers can be one-liners:
 
 ```bash
-get "/" echo "welcome"
+get "/hi/:name" echo 'hi $name, how are you??'
 ```
 
 you can, of course, define your own commands/functions and use those as well.

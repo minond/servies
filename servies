@@ -80,18 +80,37 @@ listen() {
 #==============================================================================
 route() {
     local action=
+    local values=
+    local groups=
 
     local conn=$1
     local method=$2
     local url=$3
 
-    for ((i=0;i<${#ROUTE_METHODS[@]};i++))
-    do
+    for ((i=0;i<${#ROUTE_METHODS[@]};i++)) do
         route_matches_index "$i" "$method" "$url"
         if [ $? -eq 0 ]; then
+            values=$(echo "$url" | sed -E "${ROUTE_EXTRACTOR[$i]}")
+            groups="${ROUTE_GROUPS[$i]}"
+
+            # cast to array. better way to do this??
+            groups=( $groups )
+            values=( $values )
+
             action="${ROUTE_HANDLERS[$i]}"
             break
         fi
+    done
+
+    # declare all matches in the local scope. perhaps there's a way to do this
+    # so it doesn't muck up this function's scope.
+    for i in $(seq 0 $(echo "$groups" | wc -w)); do
+        local group="${groups[$i]}"
+        local value="${values[$i]}"
+
+        [ -z "$group" ] && continue
+
+        eval "local $group=$value"
     done
 
     [ -z "$action" ] && action=not_found

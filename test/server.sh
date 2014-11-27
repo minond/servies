@@ -17,3 +17,9 @@ expect "can make a put request and get expected response" \
 
 expect "requests to invalid routes respond with a 404" \
     $(grep -q "404 Not Found" <<< $(curl -X GET "$HOST:$PORT/getsss" -si))
+
+expect "required url parameters can be included in response" \
+    $(test "$(curl -X GET "$HOST:$PORT/hello/marcos" -s)" = "hello marcos")
+
+expect "optional url parameters can be included in response" \
+    $(test "$(curl -X GET "$HOST:$PORT/hello" -s)" = "hello friend")
