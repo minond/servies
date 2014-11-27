@@ -26,8 +26,8 @@ checkout the `sample.sh` file for an example.
 required (`:something`) and optional (`:something?`) route parameters are
 supported. during the routing, servies will extract these values from the url
 and declare them as variables you can use. if you want to use variables in
-these, make sure to declare your handlers using single quotes so that the
-variables are evaluated during the routing
+these, make sure to declare your handlers using single (or escape the dollar
+sign) quotes so that the variables are evaluated during the routing
 
 #### usage
 
