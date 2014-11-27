@@ -43,17 +43,26 @@ listen() {
             local method=
             local url=
 
+            # read every line from the request
             while read line; do
                 line=$(echo "$line" | tr -d '\r\n')
 
+                # if this is the first line, save the route information
                 if [ "$parsed" -eq 0 ]; then
                     parsed=1
                     url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
                     method=$(echo "$line" | sed -n 's/\(.*\) .* .*/\1/p');
                 fi
 
+                # if the trimmed line is empty, we have parsed all the headers
+                # and are moving into the body of the request. now we can start
+                # working on the reponse.
                 if [ "x$line" = "x" ]; then
                     route "$conn" "$method" "$url"
+
+                    # do not care what the body includes. if we wanted to add
+                    # body parsing, it would go here.
+                    break
                 fi
             done
         )
