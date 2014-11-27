@@ -5,7 +5,8 @@ to HTTP requests.
 
 #### example
 
-your request handlers can be one-liners:
+route definitions are done using this method: `[http method] [url pattern]
+[command]`. your request handlers can be one-liners:
 
 ```bash
 get "/hi/:name" echo 'hi $name, how are you??'
@@ -16,22 +17,23 @@ I won't include an example of that because it's not "dead sexy" (yeah, that's
 for you)
 
 anything sent to stdout by your handler function or command will be sent back
-as the response body. there's only a `status` and a `header` command that you
-can use to customize the status code and to add any header you want.
+as the response body, but there's also a `status` and a `header` command that
+you can use to customize the status code and to add any header you want.
+checkout the `sample.sh` file for an example.
 
-ok, so let's say you saved that to a file named `app`. to start that server,
-just run `server app`, and that will make netcat listen to requests made to
-your local host on port `8080` and route your requests. checkout the
-`sample.sh` file for an example.
+#### usage
 
-you can also set a `PORT` and/or a `HOST` variable to bind netcat to something
-other than the default `0.0.0.0:8080`.
+let's say you saved that to a file named `app`. to start that server, just run
+`server app`, and that will make netcat listen to requests made to your local
+host on port `8080` and route your requests. you can also set a `PORT` and/or a
+`HOST` variable to bind netcat to something other than the default
+`0.0.0.0:8080`.
 
 #### routes
 
 required (`:something`) and optional (`:something?`) route parameters are
-supported. if you want to use variables like this, make sure to declare your
-handlers using single quotes so that the variable is evaluated during the
+supported. if you want to use variables in these, make sure to declare your
+handlers using single quotes so that the variables are evaluated during the
 routing
 
 #### installing
