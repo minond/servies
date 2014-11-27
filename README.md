@@ -27,6 +27,13 @@ your local host on port `8080` and route your requests. checkout the
 you can also set a `PORT` and/or a `HOST` variable to bind netcat to something
 other than the default `0.0.0.0:8080`.
 
+#### routes
+
+required (`:something`) and optional (`:something?`) route parameters are
+supported. if you want to use variables like this, make sure to declare your
+handlers using single quotes so that the variable is evaluated during the
+routing
+
 #### installing
 
 clone the repo and run `make install` (you may need to sudo that)

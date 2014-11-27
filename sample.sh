@@ -2,7 +2,7 @@
 get "/ps" ps aux
 
 # this is a route with a "name" parameter that is extracted from the url
-# if you want to use variables like this, make sure to declare you handlers
+# if you want to use variables like this, make sure to declare your handlers
 # using single quotes so that the variable is evaluated during the routing
 get "/hello/:name" echo 'hello $name'
 
