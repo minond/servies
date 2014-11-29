@@ -1,4 +1,4 @@
-.PHONY: install test deps
+.PHONY: dependencies install test lint
 
 dependencies:
 	@git submodule update --init --recursive
