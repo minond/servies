@@ -48,11 +48,12 @@ test`
 
 #### important
 
-don't ever use this. it has issues with the responses, it probably can't handle
-a whole lot of usage, and let's not even get started on the security issues
-something like this has. I mean, you can do something like this `get "/:file"
-cat \$file` and make most of your file system avialable. this is just a toy
-project. just play around with it.
+I think most of what I'm going to say does without saying, but I'll say it
+anywa. don't use this for anything on "production." it can't handle a whole lot
+of usage, and let's not even get started on the security issues something like
+this has. I mean, you can do something like this `get "/:file" cat \$file` and
+make most of your file system avialable. and there are plenty of other ways a
+bash/sh command can compromise your system.
 
 #### also important
 
