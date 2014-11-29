@@ -33,7 +33,7 @@ pipe() {
 # DESCRIPTION: makes netcat listen for a request
 # PARAMETER 1: name of fifo file
 # PARAMETER 2: listen on this host
-# PARAMETER 2: listen on this port
+# PARAMETER 3: listen on this port
 #==============================================================================
 listen() {
     local conn=$1
