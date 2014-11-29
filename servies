@@ -20,7 +20,12 @@ declare -A http_status_codes=(
 pipe() {
     local name=$1
     mkfifo "$name"
-    trap "rm -f '$name'" EXIT
+
+    # if we were able to create the fifo, this makes sure to remove it when
+    # this program ends
+    if [ $? -eq 0 ]; then
+        trap "rm -f '$name'" EXIT
+    fi
 }
 
 #=== FUNCTION =================================================================
@@ -39,15 +44,28 @@ listen() {
 
     while true; do
         cat "$conn" | netcat -l "$host" "$port" > >(
+            # this block is executed when we get a request
             local parsed=0
             local method=
             local url=
 
-            # read every line from the request
+            # requests look like this:
+            # GET /hi/marcos HTTP/1.1
+            # Host: localhost:8080
+            # Connection: keep-alive
+            # Accept: text/html
+            # User-Agent: Mozilla/5.0
+            # Accept-Encoding: gzip, deflate, sdch
+            # Accept-Language: en-US,en;q=0.8
             while read line; do
                 line=$(echo "$line" | tr -d '\r\n')
 
                 # if this is the first line, save the route information
+                # all we really need for basic routing is the informaiton
+                # that is included in the first line of the request:
+                # GET /hi/marcos HTTP/1.1
+                # so if this is the first time parsing the request, save that
+                # first line
                 if [ "$parsed" -eq 0 ]; then
                     parsed=1
                     url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
@@ -57,7 +75,7 @@ listen() {
                 # if the trimmed line is empty, we have parsed all the headers
                 # and are moving into the body of the request. now we can start
                 # working on the reponse.
-                if [ "x$line" = "x" ]; then
+                if [ -z "$line" ]; then
                     route "$conn" "$method" "$url"
 
                     # do not care what the body includes. if we wanted to add
@@ -67,6 +85,9 @@ listen() {
             done
         )
 
+        # TODO I'm not actually sure why I have to do this here. I was having
+        # issues with the time tracker in `debug` being unique to every route
+        # call for some reason. wound't be surprised if it's something obvious
         debug:time_reset
     done
 }
@@ -88,8 +109,12 @@ route() {
     local url=$3
 
     for ((i=0;i<${#ROUTE_METHODS[@]};i++)) do
+        # go throught ever single saved route until we find one that has a
+        # pattern that matches the requested url
         route_matches_index "$i" "$method" "$url"
         if [ $? -eq 0 ]; then
+            # use the extractor string with sed to get all of the url group
+            # values
             values=$(echo "$url" | sed -E "${ROUTE_EXTRACTOR[$i]}")
             groups="${ROUTE_GROUPS[$i]}"
 
@@ -97,26 +122,40 @@ route() {
             groups=( $groups )
             values=( $values )
 
+            # save the action we will be calling later and stop here. handlers
+            # are always processed in sequential order, and which ever one is
+            # set, and therefore found, first takes precedence
             action="${ROUTE_HANDLERS[$i]}"
             break
         fi
     done
 
-    # declare all matches in the local scope. perhaps there's a way to do this
-    # so it doesn't muck up this function's scope.
+    # now using the list of groups in the url and their values extracted, we
+    # declare them in the local scope. perhaps there's a way to do this so
+    # the newly declared variables don't muck up this function's scope.
     for i in $(seq 0 "$(echo "$groups" | wc -w)"); do
         local group="${groups[$i]}"
         local value="${values[$i]}"
 
+        # if for some odd reason we have an empty variable name (group, here)
+        # skip over it. empty values are fine
         [ -z "$group" ] && continue
 
-        eval "local $group=$value"
+        # TODO perhaps a sub-shell?
+        declare "$group"="$value"
     done
 
+    # if we couldn't find a matching route, we won't have a handler. if this
+    # the case the we default to the `not_found` action, which can be
+    # overwritten by the user
     [ -z "$action" ] && action=not_found
+
+    # TODO here's another odd problem with `debug` variables being unique per
+    # request. see `debug:time_reset` call in the `listen` function.
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
 
+    # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
     eval "$action" 2> /dev/null > "$conn"
 }
@@ -135,9 +174,13 @@ route_matches_index() {
     local method="$2"
     local url="$3"
 
+    # first check the methods match, that's an easy comparison.
     if [ "${ROUTE_METHODS[$i]}" = "$method" ]; then
+        # them we check if the request's url matches the url pattern we
+        # generated for this route
         echo "$url" | grep -e "${ROUTE_PATTERN[$i]}" &> /dev/null
     else
+        # method doesn't match. don't bother with url comparison
         false
     fi
 }
@@ -183,6 +226,7 @@ go() {
 # DESCRIPTION: default not found handler. overwrite for custom output
 #==============================================================================
 not_found() {
+    # isn't HTTP the simplest protocol?
     echo HTTP/1.1 404 Not Found
     echo Content-Type: text/plain
     echo
