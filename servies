@@ -9,12 +9,12 @@ SERVIES_ROUTE_METHODS=()
 SERVIES_ROUTE_PATTERN=()
 SERVIES_ROUTE_URLS=()
 
-DEBUG_ROUTER_COLOR="$RANDOM"
-
-declare -A http_status_codes=(
+declare -A SERVIES_HTTP_STATUS_CODES=(
     ["200"]="OK"
     ["404"]="Not found"
 )
+
+DEBUG_ROUTER_COLOR="$RANDOM"
 
 #=== FUNCTION =================================================================
 #        NAME: servies:pipe
@@ -308,7 +308,7 @@ status() {
     local code=$1
     local name=$2
 
-    [ -z "$name" ] && name="${http_status_codes[$code]}"
+    [ -z "$name" ] && name="${SERVIES_HTTP_STATUS_CODES[$code]}"
 
     echo HTTP/1.1 "$code" "$name"
 }
