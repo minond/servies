@@ -2,6 +2,8 @@
 
 source "$(dirname "$(readlink -f "$BASH_SOURCE")")"/vendor/minond/debug/debug
 
+SERVIES_FILE_CONN=
+
 SERVIES_ROUTE_EXTRACTOR=()
 SERVIES_ROUTE_GROUPS=()
 SERVIES_ROUTE_HANDLERS=()
@@ -22,8 +24,8 @@ DEBUG_ROUTER_COLOR="$RANDOM"
 # PARAMETER 1: name of fifo file
 #==============================================================================
 servies:pipe() {
-    SERVIES_CONN=$1
-    mkfifo "$SERVIES_CONN"
+    SERVIES_FILE_CONN=$1
+    mkfifo "$SERVIES_FILE_CONN"
 
     # if we were able to create the fifo, this makes sure to remove it when
     # this program ends
@@ -32,7 +34,7 @@ servies:pipe() {
         # ignoring shellcheck's single quotes on trap calls rule because I do
         # want the variable to be expanded upon call time
         # https://github.com/koalaman/shellcheck/wiki/SC2064
-        trap "rm -f '$SERVIES_CONN'" EXIT
+        trap "rm -f '$SERVIES_FILE_CONN'" EXIT
     fi
 }
 
@@ -49,7 +51,7 @@ servies:listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat < "$SERVIES_CONN" | netcat -l "$host" "$port" > >(servies:handle)
+        cat < "$SERVIES_FILE_CONN" | netcat -l "$host" "$port" > >(servies:handle)
 
         # resetting timer because handler is in a subshell
         debug:time_reset
@@ -167,7 +169,7 @@ servies:route() {
 
     # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
-    eval "$action" 2> /dev/null > "$SERVIES_CONN"
+    eval "$action" 2> /dev/null > "$SERVIES_FILE_CONN"
 }
 
 #=== FUNCTION =================================================================
