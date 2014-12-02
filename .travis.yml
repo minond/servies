@@ -7,7 +7,7 @@ env:
   - PORT=9531 HOST=0.0.0.0
 
 before_script:
-  - apt-get install shellcheck
+  - sudo apt-get install shellcheck
 
 script:
   - ./servies sample.sh &
