@@ -51,7 +51,6 @@ listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        # cat "$conn" | netcat -l "$host" "$port" > >(handle)
         cat < "$conn" | netcat -l "$host" "$port" > >(handle)
 
         # resetting timer because handler is in a subshell
