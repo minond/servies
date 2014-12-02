@@ -1,13 +1,13 @@
-language: php
+language: haskell
 
-php:
-  - 5.5
+ghc:
+  - 7.6
 
 env:
   - PORT=9531 HOST=0.0.0.0
 
-before_script:
-  - sudo apt-get install shellcheck
+install:
+  - cabal install shellcheck
 
 script:
   - ./servies sample.sh &
