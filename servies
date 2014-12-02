@@ -266,7 +266,7 @@ url_pattern() {
         # /welcome/:name => /welcome/\w\+\?
         sed 's/?/\\?/g')
 
-    echo "^${pattern}$"
+    echo "^${pattern}\$"
 }
 
 #=== FUNCTION =================================================================
@@ -305,9 +305,9 @@ url_extractor() {
 # PARAMETER 1: the url you want to get groups from
 #==============================================================================
 url_groups() {
-    echo $(echo "$1" | \
+    (echo "$1" | \
         grep -o -e ':\w\+' | \
-        grep -o -e '\w\+')
+        grep -o -e '\w\+') | xargs
 }
 
 #=== FUNCTION =================================================================
