@@ -2,12 +2,12 @@
 
 source "$(dirname "$(readlink -f "$BASH_SOURCE")")"/vendor/minond/debug/debug
 
-ROUTE_EXTRACTOR=()
-ROUTE_GROUPS=()
-ROUTE_HANDLERS=()
-ROUTE_METHODS=()
-ROUTE_PATTERN=()
-ROUTE_URLS=()
+SERVIES_ROUTE_EXTRACTOR=()
+SERVIES_ROUTE_GROUPS=()
+SERVIES_ROUTE_HANDLERS=()
+SERVIES_ROUTE_METHODS=()
+SERVIES_ROUTE_PATTERN=()
+SERVIES_ROUTE_URLS=()
 
 DEBUG_ROUTER_COLOR="$RANDOM"
 
@@ -123,15 +123,15 @@ route() {
     local method=$2
     local url=$3
 
-    for ((i=0;i<${#ROUTE_METHODS[@]};i++)) do
+    for ((i=0;i<${#SERVIES_ROUTE_METHODS[@]};i++)) do
         # go throught ever single saved route until we find one that has a
         # pattern that matches the requested url
         route_matches_index "$i" "$method" "$url"
         if [ $? -eq 0 ]; then
             # use the extractor string with sed to get all of the url group
             # values
-            values=$(echo "$url" | sed -E "${ROUTE_EXTRACTOR[$i]}")
-            groups="${ROUTE_GROUPS[$i]}"
+            values=$(echo "$url" | sed -E "${SERVIES_ROUTE_EXTRACTOR[$i]}")
+            groups="${SERVIES_ROUTE_GROUPS[$i]}"
 
             # cast to array. better way to do this??
             groups=( $groups )
@@ -140,7 +140,7 @@ route() {
             # save the action we will be calling later and stop here. handlers
             # are always processed in sequential order, and which ever one is
             # set, and therefore found, first takes precedence
-            action="${ROUTE_HANDLERS[$i]}"
+            action="${SERVIES_ROUTE_HANDLERS[$i]}"
             break
         fi
     done
@@ -189,10 +189,10 @@ route_matches_index() {
     local url="$3"
 
     # first check the methods match, that's an easy comparison.
-    if [ "${ROUTE_METHODS[$i]}" = "$method" ]; then
+    if [ "${SERVIES_ROUTE_METHODS[$i]}" = "$method" ]; then
         # them we check if the request's url matches the url pattern we
         # generated for this route
-        echo "$url" | grep -e "${ROUTE_PATTERN[$i]}" &> /dev/null
+        echo "$url" | grep -e "${SERVIES_ROUTE_PATTERN[$i]}" &> /dev/null
     else
         # method doesn't match. don't bother with url comparison
         false
@@ -325,12 +325,12 @@ save_route() {
     shift
     local handler="$*"
 
-    ROUTE_PATTERN+=("$(url_pattern "$url")")
-    ROUTE_EXTRACTOR+=("$(url_extractor "$url")")
-    ROUTE_GROUPS+=("$(url_groups "$url")")
-    ROUTE_URLS+=("$url")
-    ROUTE_METHODS+=("$method")
-    ROUTE_HANDLERS+=("$handler")
+    SERVIES_ROUTE_PATTERN+=("$(url_pattern "$url")")
+    SERVIES_ROUTE_EXTRACTOR+=("$(url_extractor "$url")")
+    SERVIES_ROUTE_GROUPS+=("$(url_groups "$url")")
+    SERVIES_ROUTE_URLS+=("$url")
+    SERVIES_ROUTE_METHODS+=("$method")
+    SERVIES_ROUTE_HANDLERS+=("$handler")
 
     debug route "creating route: $method $url"
 }

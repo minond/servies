@@ -12,3 +12,6 @@ test: dependencies
 lint:
 	shellcheck test/* -e SC2046 -e SC2148
 	shellcheck servies
+
+sample:
+	@DEBUG=* ./servies sample.sh
