@@ -22,8 +22,8 @@ DEBUG_ROUTER_COLOR="$RANDOM"
 # PARAMETER 1: name of fifo file
 #==============================================================================
 servies:pipe() {
-    local name=$1
-    mkfifo "$name"
+    SERVIES_CONN=$1
+    mkfifo "$SERVIES_CONN"
 
     # if we were able to create the fifo, this makes sure to remove it when
     # this program ends
@@ -32,26 +32,24 @@ servies:pipe() {
         # ignoring shellcheck's single quotes on trap calls rule because I do
         # want the variable to be expanded upon call time
         # https://github.com/koalaman/shellcheck/wiki/SC2064
-        trap "rm -f '$name'" EXIT
+        trap "rm -f '$SERVIES_CONN'" EXIT
     fi
 }
 
 #=== FUNCTION =================================================================
 #        NAME: servies:listen
 # DESCRIPTION: makes netcat listen for a request
-# PARAMETER 1: name of fifo file
-# PARAMETER 2: listen on this host
-# PARAMETER 3: listen on this port
+# PARAMETER 1: listen on this host
+# PARAMETER 2: listen on this port
 #==============================================================================
 servies:listen() {
-    local conn=$1
-    local host=$2
-    local port=$3
+    local host=$1
+    local port=$2
 
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat < "$conn" | netcat -l "$host" "$port" > >(servies:handle)
+        cat < "$SERVIES_CONN" | netcat -l "$host" "$port" > >(servies:handle)
 
         # resetting timer because handler is in a subshell
         debug:time_reset
@@ -98,7 +96,7 @@ servies:handle() {
         # and are moving into the body of the request. now we can start
         # working on the reponse.
         if [ -z "$line" ]; then
-            servies:route "$conn" "$method" "$url"
+            servies:route "$method" "$url"
 
             # do not care what the body includes. if we wanted to add
             # body parsing, it would go here.
@@ -110,18 +108,16 @@ servies:handle() {
 #=== FUNCTION =================================================================
 #        NAME: servies:route
 # DESCRIPTION: find a request handler and call the action
-# PARAMETER 1: name of fifo file
-# PARAMETER 2: http method
-# PARAMETER 3: url
+# PARAMETER 1: http method
+# PARAMETER 2: url
 #==============================================================================
 servies:route() {
     local action=
     local values=
     local groups=
 
-    local conn=$1
-    local method=$2
-    local url=$3
+    local method=$1
+    local url=$2
 
     for ((i=0;i<${#SERVIES_ROUTE_METHODS[@]};i++)) do
         # go throught ever single saved route until we find one that has a
@@ -171,7 +167,7 @@ servies:route() {
 
     # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
-    eval "$action" 2> /dev/null > "$conn"
+    eval "$action" 2> /dev/null > "$SERVIES_CONN"
 }
 
 #=== FUNCTION =================================================================
@@ -207,11 +203,8 @@ servies:start() {
     [ -z "$PORT" ] && PORT=8080
     [ -z "$HOST" ] && HOST=0.0.0.0
 
-    local conn=$(mktemp -u)
-    debug pipe "pipe file: $conn"
-
-    servies:pipe "$conn"
-    servies:listen "$conn" "$HOST" "$PORT"
+    servies:pipe "$(mktemp -u)"
+    servies:listen "$HOST" "$PORT"
 }
 
 #=== FUNCTION =================================================================
