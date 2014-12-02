@@ -277,7 +277,7 @@ url_pattern() {
 #==============================================================================
 url_extractor() {
     local url="$1"
-    local groups=$(echo "$(url_groups "$url")" | wc -w)
+    local groups=$(url_groups "$url" | wc -w)
 
     local replace=
     local search=$(echo "$url" | \
