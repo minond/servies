@@ -149,7 +149,7 @@ route() {
     # now using the list of groups in the url and their values extracted, we
     # declare them in the local scope. perhaps there's a way to do this so
     # the newly declared variables don't muck up this function's scope.
-    for i in $(seq 0 "$(echo "$groups" | wc -w)"); do
+    for i in $(seq 0 "$(echo "${groups[*]}" | wc -w)"); do
         local group="${groups[$i]}"
         local value="${values[$i]}"
 

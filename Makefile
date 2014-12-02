@@ -10,5 +10,5 @@ test: dependencies
 	@vendor/minond/expect/expect test/*
 
 lint:
-	shellcheck test/* -e SC2046
+	shellcheck test/* -e SC2046 -e SC2148
 	shellcheck servies

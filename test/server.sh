@@ -23,3 +23,7 @@ expect "required url parameters can be included in response" \
 
 expect "optional url parameters can be included in response" \
     $(test "$(curl -X GET "$HOST:$PORT/hello" -s)" = "hello friend")
+
+expect "matches multiple url parameters" \
+    $(test "$(curl -X GET "$HOST:$PORT/person/marcos/age/25/gender/male" -s)" = \
+        "name: marcos age: 25 gender: male")

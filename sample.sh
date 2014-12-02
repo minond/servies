@@ -16,6 +16,15 @@ post "/post" echo "post response"
 put "/put" echo "put response"
 patch "/patch" echo "patch response"
 
+# multiple params in url
+# get "/person/:name/age/:age/gender/:gender" echo 'hello $name\nfd'
+get "/person/:name/age/:age/gender/:gender" echo $(cat <<-'VIEW'
+name: $name
+age: $age
+gender: $gender
+VIEW
+)
+
 # you can route requests to your own commands, of course
 get "/netstat/:prog/prog" show_netstat --prog
 get "/netstat/:port/port" show_netstat --port
