@@ -17,11 +17,11 @@ declare -A http_status_codes=(
 )
 
 #=== FUNCTION =================================================================
-#        NAME: pipe
+#        NAME: servies:pipe
 # DESCRIPTION: create a fifo that acts as a pipe from a program to another
 # PARAMETER 1: name of fifo file
 #==============================================================================
-pipe() {
+servies:pipe() {
     local name=$1
     mkfifo "$name"
 
@@ -37,13 +37,13 @@ pipe() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: listen
+#        NAME: servies:listen
 # DESCRIPTION: makes netcat listen for a request
 # PARAMETER 1: name of fifo file
 # PARAMETER 2: listen on this host
 # PARAMETER 3: listen on this port
 #==============================================================================
-listen() {
+servies:listen() {
     local conn=$1
     local host=$2
     local port=$3
@@ -51,7 +51,7 @@ listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat < "$conn" | netcat -l "$host" "$port" > >(handle)
+        cat < "$conn" | netcat -l "$host" "$port" > >(servies:handle)
 
         # resetting timer because handler is in a subshell
         debug:time_reset
@@ -59,13 +59,13 @@ listen() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: handle
+#        NAME: servies:handle
 # DESCRIPTION: reads a request form netcat and sends back a response
 # PARAMETER 1: name of fifo file
 # PARAMETER 2: listen on this host
 # PARAMETER 3: listen on this port
 #==============================================================================
-handle() {
+servies:handle() {
     # this block is executed when we get a request
     local parsed=0
     local method=
@@ -98,7 +98,7 @@ handle() {
         # and are moving into the body of the request. now we can start
         # working on the reponse.
         if [ -z "$line" ]; then
-            route "$conn" "$method" "$url"
+            servies:route "$conn" "$method" "$url"
 
             # do not care what the body includes. if we wanted to add
             # body parsing, it would go here.
@@ -108,13 +108,13 @@ handle() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: route
+#        NAME: servies:route
 # DESCRIPTION: find a request handler and call the action
 # PARAMETER 1: name of fifo file
 # PARAMETER 2: http method
 # PARAMETER 3: url
 #==============================================================================
-route() {
+servies:route() {
     local action=
     local values=
     local groups=
@@ -126,7 +126,7 @@ route() {
     for ((i=0;i<${#SERVIES_ROUTE_METHODS[@]};i++)) do
         # go throught ever single saved route until we find one that has a
         # pattern that matches the requested url
-        route_matches_index "$i" "$method" "$url"
+        servies:route_matches_index "$i" "$method" "$url"
         if [ $? -eq 0 ]; then
             # use the extractor string with sed to get all of the url group
             # values
@@ -175,7 +175,7 @@ route() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: route_matches_index
+#        NAME: servies:route_matches_index
 # DESCRIPTION: given a url and a request method, and also the index of the
 #              routes array of the route in question, this will check if
 #              the route in question can be used to handle the request
@@ -183,7 +183,7 @@ route() {
 # PARAMETER 2: request method
 # PARAMETER 3: url
 #==============================================================================
-route_matches_index() {
+servies:route_matches_index() {
     local i="$1"
     local method="$2"
     local url="$3"
@@ -197,6 +197,105 @@ route_matches_index() {
         # method doesn't match. don't bother with url comparison
         false
     fi
+}
+
+#=== FUNCTION =================================================================
+#        NAME: go
+# DESCRIPTION: start a server
+#==============================================================================
+servies:start() {
+    [ -z "$PORT" ] && PORT=8080
+    [ -z "$HOST" ] && HOST=0.0.0.0
+
+    local conn=$(mktemp -u)
+    debug pipe "pipe file: $conn"
+
+    servies:pipe "$conn"
+    servies:listen "$conn" "$HOST" "$PORT"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: servies:url_pattern
+# DESCRIPTION: converts a human-friendly url into a string you can use as a
+#              match expression
+# PARAMETER 1: the url you want to convert into an expression
+#==============================================================================
+servies:url_pattern() {
+    local pattern=$(echo "$1" | \
+        # make slashes optional: /welcome/ => \/?welcome\/?
+        sed 's/\//\/?/g' | \
+        # replace human groups with regex groups: /welcome/:name => /welcome/.\+
+        sed -E 's/:(\w*)/.\\+/g' | \
+        # replace question makes with optional group match expressions:
+        # /welcome/:name => /welcome/\w\+\?
+        sed 's/?/\\?/g')
+
+    echo "^${pattern}\$"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: servies:url_extractor
+# DESCRIPTION: converts a human-friendly url into a sed match and replace
+#              expression that can be used to extract match values
+# PARAMETER 1: the url you want to convert into an expression
+#==============================================================================
+servies:url_extractor() {
+    local url="$1"
+    local groups=$(servies:url_groups "$url" | wc -w)
+
+    local replace=
+    local search=$(echo "$url" | \
+        # escape forward slashes
+        sed 's/\//\\\//g' | \
+        # optional forward slashes
+        sed 's/\//\/{0,}/g' | \
+        # replace groups with work matching expression
+        sed -E 's/:(\w*)/(\\w\+)/g' | \
+        # replace question marks with regex expression for optional matches
+        sed 's/?/{0,}/g')
+
+    if [ "$groups" -ne 0 ]; then
+        for i in $(seq 1 "$groups"); do
+            replace="$replace \\$i"
+        done
+    fi
+
+    echo "s/$search/$replace/"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: servies:url_groups
+# DESCRIPTION: searches a url for groups (:group_name)
+# PARAMETER 1: the url you want to get groups from
+#==============================================================================
+servies:url_groups() {
+    (echo "$1" | \
+        grep -o -e ':\w\+' | \
+        grep -o -e '\w\+') | xargs
+}
+
+#=== FUNCTION =================================================================
+#        NAME: servies:save_route
+# DESCRIPTION: add a new route
+# PARAMETER 1: method
+# PARAMETER 2: url string (include first forward slash)
+# PARAMETER 3: command name
+#==============================================================================
+servies:save_route() {
+    local method=$1
+    local url=$2
+    shift
+    shift
+    local handler="$*"
+
+    SERVIES_ROUTE_PATTERN+=("$(servies:url_pattern "$url")")
+    SERVIES_ROUTE_EXTRACTOR+=("$(servies:url_extractor "$url")")
+    SERVIES_ROUTE_GROUPS+=("$(servies:url_groups "$url")")
+    SERVIES_ROUTE_URLS+=("$url")
+    SERVIES_ROUTE_METHODS+=("$method")
+    SERVIES_ROUTE_HANDLERS+=("$handler")
+
+    debug route "creating route: $method $url"
 }
 
 #=== FUNCTION =================================================================
@@ -225,21 +324,6 @@ header() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: go
-# DESCRIPTION: start a server
-#==============================================================================
-go() {
-    [ -z "$PORT" ] && PORT=8080
-    [ -z "$HOST" ] && HOST=0.0.0.0
-
-    local conn=$(mktemp -u)
-    debug pipe "pipe file: $conn"
-
-    pipe "$conn"
-    listen "$conn" "$HOST" "$PORT"
-}
-
-#=== FUNCTION =================================================================
 #        NAME: not_found
 # DESCRIPTION: default not found handler. overwrite for custom output
 #==============================================================================
@@ -252,97 +336,13 @@ not_found() {
 }
 
 #=== FUNCTION =================================================================
-#        NAME: url_pattern
-# DESCRIPTION: converts a human-friendly url into a string you can use as a
-#              match expression
-# PARAMETER 1: the url you want to convert into an expression
-#==============================================================================
-url_pattern() {
-    local pattern=$(echo "$1" | \
-        # make slashes optional: /welcome/ => \/?welcome\/?
-        sed 's/\//\/?/g' | \
-        # replace human groups with regex groups: /welcome/:name => /welcome/.\+
-        sed -E 's/:(\w*)/.\\+/g' | \
-        # replace question makes with optional group match expressions:
-        # /welcome/:name => /welcome/\w\+\?
-        sed 's/?/\\?/g')
-
-    echo "^${pattern}\$"
-}
-
-#=== FUNCTION =================================================================
-#        NAME: url_extractor
-# DESCRIPTION: converts a human-friendly url into a sed match and replace
-#              expression that can be used to extract match values
-# PARAMETER 1: the url you want to convert into an expression
-#==============================================================================
-url_extractor() {
-    local url="$1"
-    local groups=$(url_groups "$url" | wc -w)
-
-    local replace=
-    local search=$(echo "$url" | \
-        # escape forward slashes
-        sed 's/\//\\\//g' | \
-        # optional forward slashes
-        sed 's/\//\/{0,}/g' | \
-        # replace groups with work matching expression
-        sed -E 's/:(\w*)/(\\w\+)/g' | \
-        # replace question marks with regex expression for optional matches
-        sed 's/?/{0,}/g')
-
-    if [ "$groups" -ne 0 ]; then
-        for i in $(seq 1 "$groups"); do
-            replace="$replace \\$i"
-        done
-    fi
-
-    echo "s/$search/$replace/"
-}
-
-#=== FUNCTION =================================================================
-#        NAME: url_groups
-# DESCRIPTION: searches a url for groups (:group_name)
-# PARAMETER 1: the url you want to get groups from
-#==============================================================================
-url_groups() {
-    (echo "$1" | \
-        grep -o -e ':\w\+' | \
-        grep -o -e '\w\+') | xargs
-}
-
-#=== FUNCTION =================================================================
-#        NAME: save_route
-# DESCRIPTION: add a new route
-# PARAMETER 1: method
-# PARAMETER 2: url string (include first forward slash)
-# PARAMETER 3: command name
-#==============================================================================
-save_route() {
-    local method=$1
-    local url=$2
-    shift
-    shift
-    local handler="$*"
-
-    SERVIES_ROUTE_PATTERN+=("$(url_pattern "$url")")
-    SERVIES_ROUTE_EXTRACTOR+=("$(url_extractor "$url")")
-    SERVIES_ROUTE_GROUPS+=("$(url_groups "$url")")
-    SERVIES_ROUTE_URLS+=("$url")
-    SERVIES_ROUTE_METHODS+=("$method")
-    SERVIES_ROUTE_HANDLERS+=("$handler")
-
-    debug route "creating route: $method $url"
-}
-
-#=== FUNCTION =================================================================
 #        NAME: get
 # DESCRIPTION: add a get route handler
 # PARAMETER 1: url string (include first forward slash)
 # PARAMETER 2: command name
 #==============================================================================
 get() {
-    save_route GET "$@"
+    servies:save_route GET "$@"
 }
 
 #=== FUNCTION =================================================================
@@ -352,7 +352,7 @@ get() {
 # PARAMETER 2: command name
 #==============================================================================
 post() {
-    save_route POST "$@"
+    servies:save_route POST "$@"
 }
 
 #=== FUNCTION =================================================================
@@ -362,7 +362,7 @@ post() {
 # PARAMETER 2: command name
 #==============================================================================
 put() {
-    save_route PUT "$@"
+    servies:save_route PUT "$@"
 }
 
 #=== FUNCTION =================================================================
@@ -372,11 +372,11 @@ put() {
 # PARAMETER 2: command name
 #==============================================================================
 patch() {
-    save_route PATCH "$@"
+    servies:save_route PATCH "$@"
 }
 
 # running as command?
 if [ ! -z "$1" ]; then
     source "$1"
-    go
+    servies:start
 fi

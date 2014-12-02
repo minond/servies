@@ -1,8 +1,8 @@
 source ./servies
 
 set_up() {
-    save_route ONE "/one" "one"
-    save_route TWO "/two/:name/:age" "two"
+    servies:save_route ONE "/one" "one"
+    servies:save_route TWO "/two/:name/:age" "two"
 
     get "/get/:name/:age" echo get
     post "/post/:name/:age" echo post
