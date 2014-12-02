@@ -28,6 +28,10 @@ pipe() {
     # if we were able to create the fifo, this makes sure to remove it when
     # this program ends
     if [ $? -eq 0 ]; then
+        # shellcheck disable=SC2064
+        # ignoring shellcheck's single quotes on trap calls rule because I do
+        # want the variable to be expanded upon call time
+        # https://github.com/koalaman/shellcheck/wiki/SC2064
         trap "rm -f '$name'" EXIT
     fi
 }
