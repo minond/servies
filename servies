@@ -47,52 +47,61 @@ listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat "$conn" | netcat -l "$host" "$port" > >(
-            # this block is executed when we get a request
-            local parsed=0
-            local method=
-            local url=
-
-            # requests look like this:
-            # GET /hi/marcos HTTP/1.1
-            # Host: localhost:8080
-            # Connection: keep-alive
-            # Accept: text/html
-            # User-Agent: Mozilla/5.0
-            # Accept-Encoding: gzip, deflate, sdch
-            # Accept-Language: en-US,en;q=0.8
-            while read line; do
-                line=$(echo "$line" | tr -d '\r\n')
-
-                # if this is the first line, save the route information
-                # all we really need for basic routing is the informaiton
-                # that is included in the first line of the request:
-                # GET /hi/marcos HTTP/1.1
-                # so if this is the first time parsing the request, save that
-                # first line
-                if [ "$parsed" -eq 0 ]; then
-                    parsed=1
-                    url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
-                    method=$(echo "$line" | sed -n 's/\(.*\) .* .*/\1/p');
-                fi
-
-                # if the trimmed line is empty, we have parsed all the headers
-                # and are moving into the body of the request. now we can start
-                # working on the reponse.
-                if [ -z "$line" ]; then
-                    route "$conn" "$method" "$url"
-
-                    # do not care what the body includes. if we wanted to add
-                    # body parsing, it would go here.
-                    break
-                fi
-            done
-        )
+        cat "$conn" | netcat -l "$host" "$port" > >(handle)
 
         # TODO I'm not actually sure why I have to do this here. I was having
         # issues with the time tracker in `debug` being unique to every route
         # call for some reason. wound't be surprised if it's something obvious
         debug:time_reset
+    done
+}
+
+#=== FUNCTION =================================================================
+#        NAME: handle
+# DESCRIPTION: reads a request form netcat and sends back a response
+# PARAMETER 1: name of fifo file
+# PARAMETER 2: listen on this host
+# PARAMETER 3: listen on this port
+#==============================================================================
+handle() {
+    # this block is executed when we get a request
+    local parsed=0
+    local method=
+    local url=
+
+    # requests look like this:
+    # GET /hi/marcos HTTP/1.1
+    # Host: localhost:8080
+    # Connection: keep-alive
+    # Accept: text/html
+    # User-Agent: Mozilla/5.0
+    # Accept-Encoding: gzip, deflate, sdch
+    # Accept-Language: en-US,en;q=0.8
+    while read line; do
+        line=$(echo "$line" | tr -d '\r\n')
+
+        # if this is the first line, save the route information
+        # all we really need for basic routing is the informaiton
+        # that is included in the first line of the request:
+        # GET /hi/marcos HTTP/1.1
+        # so if this is the first time parsing the request, save that
+        # first line
+        if [ "$parsed" -eq 0 ]; then
+            parsed=1
+            url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
+            method=$(echo "$line" | sed -n 's/\(.*\) .* .*/\1/p');
+        fi
+
+        # if the trimmed line is empty, we have parsed all the headers
+        # and are moving into the body of the request. now we can start
+        # working on the reponse.
+        if [ -z "$line" ]; then
+            route "$conn" "$method" "$url"
+
+            # do not care what the body includes. if we wanted to add
+            # body parsing, it would go here.
+            break
+        fi
     done
 }
 
