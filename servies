@@ -47,11 +47,10 @@ listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat "$conn" | netcat -l "$host" "$port" > >(handle)
+        # cat "$conn" | netcat -l "$host" "$port" > >(handle)
+        cat < "$conn" | netcat -l "$host" "$port" > >(handle)
 
-        # TODO I'm not actually sure why I have to do this here. I was having
-        # issues with the time tracker in `debug` being unique to every route
-        # call for some reason. wound't be surprised if it's something obvious
+        # resetting timer because handler is in a subshell
         debug:time_reset
     done
 }
@@ -163,8 +162,7 @@ route() {
     # overwritten by the user
     [ -z "$action" ] && action=not_found
 
-    # TODO here's another odd problem with `debug` variables being unique per
-    # request. see `debug:time_reset` call in the `listen` function.
+    # hard-setting color because handler is in a subshell
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
 
