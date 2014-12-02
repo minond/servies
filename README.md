@@ -46,6 +46,16 @@ clone the repo and run `make install` (you may need to sudo that)
 start the sample application, by running `./servies sample.sh`, then run `make
 test`
 
+#### bash
+
+I wrote this and tested this using GNU bash, version 4.3.11(1)-release
+(x86_64-pc-linux-gnu), shell (sh) won't do. and that's on Linux.
+
+#### dependencies
+
+I believe the only package that `servies` uses that does not come with most
+Linux distros is `netcat`.
+
 #### important
 
 I think most of what I'm going to say does without saying, but I'll say it
