@@ -73,8 +73,6 @@ servies:listen() {
 # PARAMETER 3: listen on this port
 #==============================================================================
 servies:handle() {
-    # this block is executed when we get a request
-    local parsed=0
     local method=
     local url=
 
@@ -95,8 +93,7 @@ servies:handle() {
         # GET /hi/marcos HTTP/1.1
         # so if this is the first time parsing the request, save that
         # first line
-        if [ "$parsed" -eq 0 ]; then
-            parsed=1
+        if [ -z "$url" ]; then
             url=$(echo "$line" | sed -n 's/.* \(\/.*\) .*/\1/p')
             method=$(echo "$line" | sed -n 's/\(.*\) .* .*/\1/p');
         fi
@@ -105,10 +102,10 @@ servies:handle() {
         # and are moving into the body of the request. now we can start
         # working on the reponse.
         if [ -z "$line" ]; then
+            # do not care what the body includes, so we will stop reading the
+            # request after routing it. if we wanted to add body parsing, it
+            # would go here.
             servies:route "$method" "$url"
-
-            # do not care what the body includes. if we wanted to add
-            # body parsing, it would go here.
             break
         fi
     done
