@@ -3,6 +3,8 @@
 source "$(dirname "$(readlink -f "$BASH_SOURCE")")"/vendor/minond/debug/debug
 
 SERVIES_FILE_CONN=
+SERVIES_FILE_STATUSES=
+SERVIES_FILE_HEADERS=
 
 SERVIES_ROUTE_EXTRACTOR=()
 SERVIES_ROUTE_GROUPS=()
@@ -22,10 +24,15 @@ DEBUG_ROUTER_COLOR="$RANDOM"
 #        NAME: servies:pipe
 # DESCRIPTION: create a fifo that acts as a pipe from a program to another
 # PARAMETER 1: name of fifo file
+# PARAMETER 2: name of statuses file
+# PARAMETER 3: name of headers file
 #==============================================================================
 servies:pipe() {
     SERVIES_FILE_CONN=$1
-    mkfifo "$SERVIES_FILE_CONN"
+    SERVIES_FILE_STATUSES=$2
+    SERVIES_FILE_HEADERS=$3
+
+    mkfifo "$SERVIES_FILE_CONN" && touch "$SERVIES_FILE_STATUSES" "$SERVIES_FILE_HEADERS"
 
     # if we were able to create the fifo, this makes sure to remove it when
     # this program ends
@@ -34,7 +41,7 @@ servies:pipe() {
         # ignoring shellcheck's single quotes on trap calls rule because I do
         # want the variable to be expanded upon call time
         # https://github.com/koalaman/shellcheck/wiki/SC2064
-        trap "rm -f '$SERVIES_FILE_CONN'" EXIT
+        trap "rm -f '$SERVIES_FILE_CONN' '$SERVIES_FILE_STATUSES' '$SERVIES_FILE_HEADERS'" EXIT
     fi
 }
 
@@ -169,8 +176,43 @@ servies:route() {
 
     # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
-    eval "$action" 2> /dev/null > "$SERVIES_FILE_CONN"
+    servies:reset_response
+    servies:send_response "$(eval "$action" 2> /dev/null)"
 }
+
+#=== FUNCTION =================================================================
+#        NAME: servies:reset_response
+# DESCRIPTION: reset variables used to store/track response info
+#==============================================================================
+servies:reset_response() {
+    status 200 "OK"
+    echo "" > "$SERVIES_FILE_HEADERS"
+}
+
+#=== FUNCTION =================================================================
+#        NAME: servies:send_response
+# DESCRIPTION: dump a response string into the connection fifo
+# PARAMETER 1: anything you want to send back to a client
+#==============================================================================
+servies:send_response() {
+    local content="$1"
+    local response=
+
+    header "Content-Length" "${#content}"
+
+    # builds a resopnse string that looks like this:
+    # HTTP/1.1 200 OK
+    # Content-Type: text/plain
+    # Content-Length: 484
+    # [a blank line]
+    # response body
+    response=$response$(cat "$SERVIES_FILE_STATUSES")
+    response=$response$(cat "$SERVIES_FILE_HEADERS")
+    response=$response$(echo -e "\n\n$content")
+
+    echo "$response" > "$SERVIES_FILE_CONN"
+}
+
 
 #=== FUNCTION =================================================================
 #        NAME: servies:route_matches_index
@@ -205,7 +247,7 @@ servies:start() {
     [ -z "$PORT" ] && PORT=8080
     [ -z "$HOST" ] && HOST=0.0.0.0
 
-    servies:pipe "$(mktemp -u)"
+    servies:pipe "$(mktemp -u)" "$(mktemp -u)" "$(mktemp -u)"
     servies:listen "$HOST" "$PORT"
 }
 
@@ -279,6 +321,7 @@ servies:url_groups() {
 servies:save_route() {
     local method=$1
     local url=$2
+
     shift
     shift
     local handler="$*"
@@ -305,7 +348,7 @@ status() {
 
     [ -z "$name" ] && name="${SERVIES_HTTP_STATUS_CODES[$code]}"
 
-    echo HTTP/1.1 "$code" "$name"
+    echo HTTP/1.1 "$code" "$name" > "$SERVIES_FILE_STATUSES"
 }
 
 #=== FUNCTION =================================================================
@@ -315,7 +358,7 @@ status() {
 # PARAMETER 2: header value
 #==============================================================================
 header() {
-    echo "$1: $2"
+    echo "$1: $2" >> "$SERVIES_FILE_HEADERS"
 }
 
 #=== FUNCTION =================================================================
@@ -323,10 +366,7 @@ header() {
 # DESCRIPTION: default not found handler. overwrite for custom output
 #==============================================================================
 not_found() {
-    # isn't HTTP the simplest protocol?
-    echo HTTP/1.1 404 Not Found
-    echo Content-Type: text/plain
-    echo
+    status 404 "Not Found"
     echo 404, Not found
 }
 

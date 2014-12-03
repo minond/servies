@@ -30,38 +30,21 @@ get "/netstat/:prog/prog" show_netstat --prog
 get "/netstat/:port/port" show_netstat --port
 get "/netstat/invalid" show_netstat --invalid-filter-type
 show_netstat() {
-    local type="$1"
-    local body=
-    local ok=true
+    # headers!
+    header "Content-Type" "text/plain"
 
-    case "$type" in
+    case "$1" in
         --prog)
-            body=$(netstat -pan | grep "$prog")
+            netstat -pan | grep "$prog"
             ;;
 
         --port)
-            body=$(netstat -pan | grep ":$port")
+            netstat -pan | grep ":$port"
             ;;
 
         *)
-            ok=false
-            body="invalid type: $type"
+            # send any status!!
+            status 422 "Unprocessable Entity"
+            echo "invalid type: $1"
     esac
-
-    # you can also send back any status code you'd like by using the `status`
-    # command
-    if [ $ok = false ]; then
-        status 422 "Unprocessable Entity"
-    else
-        status 200 "OK"
-    fi
-
-    # after setting the status, it is possible to set headers:
-    header "Content-Type" "text/plain"
-
-    # you must make sure to include a blank like separating your headers and
-    # the response body. this is only really needed if you are setting your
-    # own status and headers
-    echo
-    echo "$body"
 }
