@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="browser-ie7 lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="browser-ie8 lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="browser-ie9 lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="browser-modern"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title></title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://unpkg.com/tachyons@4.8.0/css/tachyons.min.css">
+        <style>
+          body {
+            background: white;
+            cursor: default;
+            font-weight: 100;
+          }
+
+          pre,
+          code {
+            font-family: monospace;
+            font-weight: bold;
+          }
+
+          pre {
+            padding: 0;
+            margin: 2rem 0;
+          }
+
+          pre cstr {
+            color: #ffb21b;
+          }
+
+          code {
+            background: #98a2d2;
+            padding: 0 3px;
+            color: white;
+          }
+
+          .servieslogo {
+            width: 15rem;
+            margin: -1rem 3rem 1rem 3rem;
+            float: right;
+          }
+        </style>
+    </head>
+    <body>
+      <div class="mw9 center pa4 pt6-ns ph7-l lh-copy baskerville f4">
+        <img class="servieslogo" src="servieslogo.png" alt="servies logo" />
+
+        <code>servies</code> is a micro framework written in bash. It uses
+        <code>netcat</code> to listen for and serve HTTP requests. Defining
+        request handlers is simply done by running a function with the same
+        name as the HTTP method, and passing it a url and command to execute.
+        For example, here's how you would create a new "/greet/" endpoint that
+        you could pass a name to and use in your response:
+
+        <pre>get <cstr>"/greet/:name"</cstr> echo <cstr>'hi $name, how are you??'</cstr></pre>
+
+        As you can see, you can add path variables to your urls using syntax
+        that you might find familiar. Any word that starts with a
+        <code>:</code> will be treated as a path variable which is then
+        available to you in the command.
+      </div>
+    </body>
+</html>
