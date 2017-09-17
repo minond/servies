@@ -63,9 +63,10 @@
           }
 
           code {
-            background: #98a2d2;
+            background: rgba(152, 162, 210, 0.15);
             padding: 0 3px;
-            color: white;
+            color: black;
+            font-weight: 100;
           }
 
           .servieslogo {
@@ -82,9 +83,9 @@
           }
 
           .container {
-            max-width: 55rem;
-            padding-left: 3rem;
-            padding-right: 3rem;
+            max-width: 50rem;
+            padding-left: 1rem;
+            padding-right: 1rem;
             margin: 0 auto;
           }
         </style>
@@ -141,12 +142,26 @@ authenticate_then_get_data() {
 
         <p>
           You get the following HTTP commands: <code>get</code>,
-          <code>post</code>, <code>put</code>, <code>patch</code>. All of which
-          have this signature: <code>name (name: string, ...cmd:
+          <code>post</code>, <code>put</code>, and <code>patch</code>. All of
+          which have this signature: <code>name (name: string, ...cmd:
           string)</code>. Along with that there is <code>status</code> and
           <code>header</code>, and <code>not_found</code> which is called when
           no routes match an incoming request. This method can be overwritten
           by you.
+        </p>
+
+        <h1>Getting started</h1>
+
+        <p>
+          Getting started is easy. First, make sure you have a newer version of
+          bash install. This may mean using Linux. So first get Linux. Second,
+          <a href="https://github.com/minond/servies/archive/master.zip" class="link">download</a>
+          and extract the code. Next run <code>make dependencies</code> to
+          download external libraries we depend on. You can run <code>make
+          install</code> to make the <code>servies</code> command available
+          from anywhere, but this is not required. Once this is done you can
+          run <code>./servies sample.sh</code> to start the sample web app or
+          pass in your own source file to run your own app.
         </p>
 
         <div class="mt4">
