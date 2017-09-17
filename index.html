@@ -24,6 +24,10 @@
             font-family: Spectral,serif;
           }
 
+          h1 {
+            font-weight: 100;
+          }
+
           body {
             background: white;
             cursor: default;
@@ -109,6 +113,8 @@
           available to you in the command.
         </p>
 
+        <h1>Documentation</h1>
+
         <p>
           You have full control over the details of your response body.
           Anything sent to <code>stdout</code> by your handler function or
@@ -133,6 +139,16 @@ authenticate_then_get_data() {
   fi
 }</pre>
 
+        <p>
+          You get the following HTTP commands: <code>get</code>,
+          <code>post</code>, <code>put</code>, <code>patch</code>. All of which
+          have this signature: <code>name (name: string, ...cmd:
+          string)</code>. Along with that there is <code>status</code> and
+          <code>header</code>, and <code>not_found</code> which is called when
+          no routes match an incoming request. This method can be overwritten
+          by you.
+        </p>
+
         <div class="mt4">
           <a target="_blank" class="link" href="https://travis-ci.org/minond/servies">
             <img src="https://travis-ci.org/minond/servies.svg?branch=master" />
@@ -143,7 +159,7 @@ authenticate_then_get_data() {
         </div>
       </div>
 
-      <footer class="bt b--light-gray spectral mt4-ns mt1 pv3 pv4-ns">
+      <footer class="bt b--light-gray spectral mt4 pv3 pv4-ns">
         <div class="container">
           <p class="lh-copy w-60-ns">
           My name is
