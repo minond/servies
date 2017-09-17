@@ -38,20 +38,24 @@
           }
 
           pre {
+            color: #383838;
             padding: 0;
             margin: 2rem 0;
-            white-space: pre-wrap;
             overflow: auto;
           }
 
           @media screen and (min-width:45em) {
             pre {
-              white-space: nowrap;
+              overflow: visible;
             }
           }
 
           pre cstr {
-            color: #ffb21b;
+            color: rgb(101, 139, 255);
+          }
+
+          pre cnum {
+            color: #3b3bff;
           }
 
           code {
@@ -87,19 +91,47 @@
           <img class="servieslogo" src="servieslogo.png" alt="servies logo" />
         </div>
 
-        <code>servies</code> is a micro framework written in bash. It uses
-        <code>netcat</code> to listen for and serve HTTP requests. Defining
-        request handlers is simply done by running a function with the same
-        name as the HTTP method, and passing it a url and command to execute.
-        For example, here's how you would create a new "/greet/" endpoint that
-        you could pass a name to and use in your response:
+        <p>
+          <code>servies</code> is a micro framework written in bash. It uses
+          <code>netcat</code> to listen for and serve HTTP requests. Defining
+          request handlers is simply done by running a function with the same
+          name as the HTTP method, and passing it a url and command to execute.
+          For example, here's how you would create a new "/greet/" endpoint
+          that you could pass a name to and use in your response:
+        </p>
 
         <pre>get <cstr>"/greet/:name"</cstr> echo <cstr>'hi $name, how are you??'</cstr></pre>
 
-        As you can see, you can add path variables to your urls using syntax
-        that you might find familiar. Any word that starts with a
-        <code>:</code> will be treated as a path variable which is then
-        available to you in the command.
+        <p>
+          As you can see, you can add path variables to your urls using syntax
+          that you might find familiar. Any word that starts with a
+          <code>:</code> will be treated as a path variable which is then
+          available to you in the command.
+        </p>
+
+        <p>
+          You have full control over the details of your response body.
+          Anything sent to <code>stdout</code> by your handler function or
+          command will be sent back as the response body. By default, your
+          response will be sent back as a <code>200 OK</code>
+          <code>plain/text</code> response, but there's also a status and a
+          header command that you can use to customize the status code and to
+          add any header you want:
+        </p>
+
+        <pre>get <cstr>"/authenticated/:name"</cstr> authenticate_then_get_data
+
+authenticate_then_get_data() {
+  header <cstr>"Content-Type"</cstr> <cstr>"application/json"</cstr>
+
+  if [ <cstr>"$name"</cstr> = <cstr>"marcos"</cstr> ]; then
+    status <cnum>200</cnum> <cstr>"OK"</cstr>
+    echo <cstr>"{\"number\": 7}"</cstr>
+  else
+    status <cnum>403</cnum> <cstr>"Forbidden"</cstr>
+    echo <cstr>"{\"error\": \"invalid name!\"}"</cstr>
+  fi
+}</pre>
 
         <div class="mt4">
           <a target="_blank" class="link" href="https://travis-ci.org/minond/servies">
@@ -111,7 +143,7 @@
         </div>
       </div>
 
-      <footer class="bt b--light-gray spectral mt4-ns mt1">
+      <footer class="bt b--light-gray spectral mt4-ns mt1 pv3 pv4-ns">
         <div class="container">
           <p class="lh-copy w-60-ns">
           My name is
