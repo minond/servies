@@ -18,6 +18,12 @@
         <meta name="referrer" content="origin">
 
         <style>
+          @import url("https://fonts.googleapis.com/css?family=Spectral");
+
+          .spectral {
+            font-family: Spectral,serif;
+          }
+
           body {
             background: white;
             cursor: default;
@@ -28,11 +34,20 @@
           code {
             font-family: monospace;
             font-weight: bold;
+            word-break: break-word;
           }
 
           pre {
             padding: 0;
             margin: 2rem 0;
+            white-space: pre-wrap;
+            overflow: auto;
+          }
+
+          @media screen and (min-width:45em) {
+            pre {
+              white-space: nowrap;
+            }
           }
 
           pre cstr {
@@ -46,15 +61,31 @@
           }
 
           .servieslogo {
-            width: 15rem;
-            margin: -1rem 3rem 1rem 3rem;
-            float: right;
+            width: 10rem;
+            margin: 2rem 1rem;
+          }
+
+          @media screen and (min-width:45em) {
+            .servieslogo {
+              width: 15rem;
+              margin: -1rem 3rem 1rem 3rem;
+              float: right;
+            }
+          }
+
+          .container {
+            max-width: 55rem;
+            padding-left: 3rem;
+            padding-right: 3rem;
+            margin: 0 auto;
           }
         </style>
     </head>
     <body>
-      <div class="mw9 center pa4 pt6-ns ph7-l lh-copy baskerville f4">
-        <img class="servieslogo" src="servieslogo.png" alt="servies logo" />
+      <div class="container center pt6-ns lh-copy baskerville f4">
+        <div class="tc">
+          <img class="servieslogo" src="servieslogo.png" alt="servies logo" />
+        </div>
 
         <code>servies</code> is a micro framework written in bash. It uses
         <code>netcat</code> to listen for and serve HTTP requests. Defining
@@ -74,11 +105,27 @@
           <a target="_blank" class="link" href="https://travis-ci.org/minond/servies">
             <img src="https://travis-ci.org/minond/servies.svg?branch=master" />
           </a>
-          <a target="_blank" class="link" href="https://github.com/minond/servies">
-            <img src="https://img.shields.io/badge/github-minond%2Fservies-brightgreen.svg" />
+          <a target="_blank" class="link pl1" href="https://github.com/minond/servies">
+            <img src="https://img.shields.io/badge/code-minond%2Fservies-brightgreen.svg" />
           </a>
         </div>
       </div>
+
+      <footer class="bt b--light-gray spectral mt4-ns mt1">
+        <div class="container">
+          <p class="lh-copy w-50-ns">
+          My name is
+          <a href="/" class="link red dim">Marcos Minond</a>,
+          and I'm a computer programmer living in Provo, Utah. Checkout my
+          <a href="/resume" class="link red dim">resume</a>
+          and
+          <a target="_blank" href="https://github.com/minond" class="link red dim">GitHub</a>,
+          and if you'd like to contact me just
+          <a target="_self" href="mailto:minond.marcos+site@gmail.com" class="link red dim">send me an email</a>.
+          </p>
+        </div>
+      </footer>
+
     </body>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
