@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 source "$(dirname "$(readlink -f "$BASH_SOURCE")")"/vendor/minond/debug/debug
 
@@ -58,7 +58,7 @@ servies:listen() {
     debug server "listening for requests on $HOST:$PORT"
 
     while true; do
-        cat < "$SERVIES_FILE_CONN" | netcat -l "$host" "$port" > >(servies:handle)
+        cat < "$SERVIES_FILE_CONN" | nc -l "$host" "$port" > >({ servies:handle; cat >/dev/null; })
 
         # resetting timer because handler is in a subshell
         debug:time_reset
