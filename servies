@@ -15,7 +15,8 @@ SERVIES_ROUTE_URLS=()
 
 declare -A SERVIES_HTTP_STATUS_CODES=(
     ["200"]="OK"
-    ["404"]="Not found"
+    ["404"]="Not Found"
+    ["500"]="Internal Server Error"
 )
 
 DEBUG_ROUTER_COLOR="$RANDOM"
@@ -173,10 +174,15 @@ servies:route() {
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
 
+    servies:reset_response
+
+    stdout=$(mktemp)
+    stderr=$(mktemp)
+
     # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
-    servies:reset_response
-    servies:send_response "$(eval "$action" 2> /dev/null)"
+    eval "$action" >"$stdout" 2>"$stderr"
+    servies:send_response $? "$(cat $stdout)" "$(cat $stderr)"
 }
 
 #=== FUNCTION =================================================================
@@ -184,18 +190,28 @@ servies:route() {
 # DESCRIPTION: reset variables used to store/track response info
 #==============================================================================
 servies:reset_response() {
-    status 200 "OK"
+    status 200
     echo "" > "$SERVIES_FILE_HEADERS"
 }
 
 #=== FUNCTION =================================================================
 #        NAME: servies:send_response
 # DESCRIPTION: dump a response string into the connection fifo
-# PARAMETER 1: anything you want to send back to a client
+# PARAMETER 1: handler's exit code
+# PARAMETER 2: anything you want to send back to a client
+# PARAMETER 3: error output, send back in case of an error
 #==============================================================================
 servies:send_response() {
-    local content="$1"
+    local exit_code="$1"
+    local content=
     local response=
+
+    if [ "$exit_code" -eq 0 ]; then
+        content="$2"
+    else
+        status 500
+        content="$3"
+    fi
 
     header "Content-Length" "${#content}"
 
@@ -365,7 +381,7 @@ header() {
 # DESCRIPTION: default not found handler. overwrite for custom output
 #==============================================================================
 not_found() {
-    status 404 "Not Found"
+    status 404
     echo 404, Not found
 }
 
