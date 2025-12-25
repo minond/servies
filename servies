@@ -174,15 +174,18 @@ servies:route() {
     debug:set_color router "$DEBUG_ROUTER_COLOR"
     debug router "routing $method $url to $action"
 
-    servies:reset_response
-
-    stdout=$(mktemp)
-    stderr=$(mktemp)
+    # if the action exits with 0, then we return stdout, stderr otherwise
+    stdout_file=$(mktemp)
+    stderr_file=$(mktemp)
 
     # TODO look into using a sub-shell instead of using eval
     # send errors to error log??
-    eval "$action" >"$stdout" 2>"$stderr"
-    servies:send_response $? "$(cat $stdout)" "$(cat $stderr)"
+    servies:reset_response
+    eval "$action" >"$stdout_file" 2>"$stderr_file"
+    servies:send_response "$?" "$(cat $stdout_file)" "$(cat $stderr_file)"
+
+    rm "$stdout_file"
+    rm "$stderr_file"
 }
 
 #=== FUNCTION =================================================================
