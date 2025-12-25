@@ -1,14 +1,14 @@
 # declares a GET route that runs "ps aux" when you request "/ps"
 get "/ps" ps aux
 
-# this is a route with a "name" parameter that is extracted from the url
+# this is a route with a "value" parameter that is extracted from the url
 # if you want to use variables like this, make sure to declare your handlers
 # using single quotes (or escape the dollar sign) so that the variable is
 # evaluated during the routing
-get "/hello/:name" echo 'hello $name'
+get "/hello/:value" echo '$value'
 
 # you can define optional parameters by adding a question mark after the name
-get "/hello/:name?" echo 'hello friend'
+get "/hello/:name?" echo 'hello ${name:-friend}'
 
 # you can declare routes of different http methods
 get "/get" echo "get response"

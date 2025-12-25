@@ -151,15 +151,17 @@ servies:route() {
     # declare them in the local scope. perhaps there's a way to do this so
     # the newly declared variables don't muck up this function's scope.
     for i in $(seq 0 "$(echo "${groups[*]}" | wc -w)"); do
-        local group="${groups[$i]}"
-        local value="${values[$i]}"
+        # prefixing variables here because we evaluate the action in the same
+        # scope and don't want name conflicts.
+        local servies_group="${groups[$i]}"
+        local servies_value="${values[$i]}"
 
         # if for some odd reason we have an empty variable name (group, here)
         # skip over it. empty values are fine
-        [ -z "$group" ] && continue
+        [ -z "$servies_group" ] && continue
 
         # TODO perhaps a sub-shell?
-        declare "$group"="$value"
+        declare "$servies_group"="$servies_value"
     done
 
     # if we couldn't find a matching route, we won't have a handler. if this
